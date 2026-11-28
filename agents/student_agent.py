@@ -7,6 +7,13 @@ from constants import *
 import numpy as np
 import time
 
+INF = 1000000
+WIN = 1000000
+TIME_LIMIT = 1.6
+
+class SearchTimeOut(Exception):
+    pass
+
 @register_agent("student_agent")          # do not change this string
 class StudentAgent(Agent):
     def __init__(self):
@@ -28,3 +35,42 @@ class StudentAgent(Agent):
         # move generator and evaluation function must too.
         # TODO: replace with your search. Keep (time.perf_counter() - start) < STEP_TIME_LIMIT - margin.
         return random_move(board, reserves, player)
+
+    def alpha_beta():
+        """
+        Placeholder for now
+        """
+        move = None
+        score = 0
+        return move, score
+
+    def iterative_deepening(self, board, reserves, player, ply, moves_order):
+        """
+        Search depth by depth until time runs out and keep the best move of last depth
+        """
+        init_time = time.perf_counter()
+        best_move = moves_order[0]
+        score = 0
+        ply_left = MAX_PLIES - ply
+        depth = 1
+
+        while (depth <= ply_left) and (time.perf_counter()-init_time < TIME_LIMIT):
+            try:
+                move, score = self.alpha_beta()
+            except SearchTimeOut:
+                break
+
+            best_move = move
+            
+            #reorder to optimize alpha beta pruning
+            moves = [move]
+            for m in moves_order:
+                if m != move:
+                    moves.append(m)
+            moves_order = moves
+
+            if abs(score) > WIN - 1000:
+                break
+            depth += 1
+
+        return best_move
